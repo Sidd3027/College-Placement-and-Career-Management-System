@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home | College Placement Portal</title>
+    <link rel="stylesheet" href="css/style.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="inner">
+        <a class="brand" href="index.html">College Placement Portal</a>
+        <nav id="public-nav">
+          <a href="index.html" class="active">Home</a>
+          <a href="about.html">About</a>
+          <a href="contact.html">Contact</a>
+          <a href="login.html">Login</a>
+          <a href="register.html" class="nav-cta">Register</a>
+        </nav>
+      </div>
+    </header>
+
+    <section class="hero">
+      <div class="container">
+        <div class="hero-badge">2026 Campus Placement Season</div>
+        <h1>One place for college placements and career preparation</h1>
+        <p>Students discover eligible openings and track interviews, companies shortlist top talent, and placement officers coordinate the entire drive effortlessly.</p>
+        <div class="hero-actions">
+          <a class="hero-cta" href="#panels">Choose your panel &rarr;</a>
+          <a class="hero-cta-secondary" href="register.html">Create an account</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="container" id="panels">
+      <h2>Choose your panel</h2>
+      <p class="muted">Select your role to sign in and access your dedicated workspace.</p>
+      <div class="grid c3">
+        <div class="card interactive">
+          <h3>Students</h3>
+          <p>Build your academic profile, upload your resume, check CGPA &amp; branch eligibility, apply for jobs, and track interviews.</p>
+          <a class="btn small" href="login.html#login-student">Open student panel</a>
+        </div>
+        <div class="card interactive">
+          <h3>Companies</h3>
+          <p>Post campus job openings, review eligible applicants, update shortlisting statuses, and schedule interview rounds.</p>
+          <a class="btn small" href="login.html#login-company">Open company panel</a>
+        </div>
+        <div class="card interactive">
+          <h3>Administrators</h3>
+          <p>Approve companies and job drives, manage student records, record final placements, and view placement analytics.</p>
+          <a class="btn small" href="login.html#login-admin">Open admin panel</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="container" style="padding-top:0">
+      <h2>Placement at a glance</h2>
+      <div class="grid c4">
+        <div class="card stat">
+          <div class="num" id="home-stat-students">0</div>
+          <div class="label">Students registered</div>
+        </div>
+        <div class="card stat">
+          <div class="num" id="home-stat-companies">0</div>
+          <div class="label">Companies visiting</div>
+        </div>
+        <div class="card stat">
+          <div class="num" id="home-stat-jobs">0</div>
+          <div class="label">Active jobs posted</div>
+        </div>
+        <div class="card stat">
+          <div class="num" id="home-stat-placed">0</div>
+          <div class="label">Students placed</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="container" style="padding-top:0">
+      <div class="page-head">
+        <h2>Latest openings</h2>
+        <a class="btn small secondary" href="login.html">Login to apply</a>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Role</th>
+              <th>Company</th>
+              <th>Location</th>
+              <th>Package</th>
+              <th>Last date</th>
+            </tr>
+          </thead>
+          <tbody id="home-latest-jobs"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <footer class="footer">&copy; 2026 College Placement Portal. College Placement and Career Management System.</footer>
+
+    <script src="js/app.js"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const students = AppData.getStudents();
+        const companies = AppData.getCompanies().filter(c => c.status === 'approved');
+        const jobs = AppData.getJobs().filter(j => j.status === 'approved');
+        const placedIds = new Set(
+          AppData.getApplications().filter(a => a.status === 'Placed').map(a => a.studentId)
+        );
+
+        document.getElementById('home-stat-students').textContent = students.length;
+        document.getElementById('home-stat-companies').textContent = companies.length;
+        document.getElementById('home-stat-jobs').textContent = jobs.length;
+        document.getElementById('home-stat-placed').textContent = placedIds.size;
+
+        const tbody = document.getElementById('home-latest-jobs');
+        if (tbody) {
+          tbody.innerHTML = jobs.length
+            ? jobs.slice(0, 5).map(j => `
+                <tr>
+                  <td><strong>${j.title}</strong></td>
+                  <td>${j.company}</td>
+                  <td>${j.location || 'Campus'}</td>
+                  <td><span class="badge blue">${j.package} LPA</span></td>
+                  <td>${j.lastDate}</td>
+                </tr>`).join('')
+            : '<tr><td colspan="5" style="text-align:center;color:#64748b;">No approved openings yet.</td></tr>';
+        }
+
+        const user = AppData.getCurrentUser();
+        if (user && user.role) {
+          const nav = document.getElementById('public-nav');
+          const dashPath = getDashboardPathForRole(user.role, false);
+          if (nav) {
+            nav.querySelectorAll('a[href="login.html"], a[href="register.html"]').forEach(el => el.remove());
+            const dashLink = document.createElement('a');
+            dashLink.href = dashPath;
+            dashLink.className = 'nav-cta';
+            dashLink.textContent = 'Go to Dashboard';
+            nav.appendChild(dashLink);
+          }
+        }
+      });
+    </script>
+  </body>
+</html>
